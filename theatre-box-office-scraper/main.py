@@ -1,31 +1,40 @@
+import sys
+
 from app.exporter import export_to_csv
 from app.scraper import scrape_events
+from app.seat_scrapper import scrape_seated_events
 
-OUTPUT_PATH = "data/output.csv"
 
-
-def main():
+def run_bulk():
     print("=" * 60)
-    print("  Theatre Box Office Scraper – bilietai.lt")
+    print("  Theatre Box Office Scraper – bilietai.lt  [bulk mode]")
     print("=" * 60)
-
     data = scrape_events()
-
     if not data:
         print("\n⚠  Scraper returned 0 events.")
-        print("   Possible causes:")
-        print("   • The site blocked the request (403 / CAPTCHA).")
-        print(
-            "   • CSS selectors changed – inspect the live page and update app/scraper.py."
-        )
-        print("   • Network issue or timeout.")
-        print("   Tip: set HEADLESS=False in app/config.py to watch the browser.")
+        print("   Tip: set HEADLESS=False in app/config.py to debug.")
     else:
-        print(f"\n  Sample record:\n  {data[0]}\n")
+        print(f"\n  Sample: {data[0]['title']} @ {data[0]['venue']}")
+    export_to_csv(data, path="data/output.csv")
+    print("\nDone → data/output.csv")
 
-    export_to_csv(data, path=OUTPUT_PATH)
-    print("\nDone.")
+
+def run_seats():
+    print("=" * 60)
+    print("  Theatre Box Office Scraper – bilietai.lt  [seat mode]")
+    print("=" * 60)
+    data = scrape_seated_events()
+    print(f"\n✓ Scraped {len(data)} events")
+    for d in data:
+        pricing = d.get("seat_pricing") or {}
+        for dt_key, seats in pricing.items():
+            print(f"  {d['title'][:45]:45s}  [{dt_key}]  {len(seats)} seats")
+    export_to_csv(data, path="data/seated_output.csv")
+    print("\nDone → data/seated_output.csv")
 
 
 if __name__ == "__main__":
-    main()
+    if "--seats" in sys.argv:
+        run_seats()
+    else:
+        run_bulk()
