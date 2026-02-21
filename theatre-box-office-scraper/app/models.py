@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel
 
@@ -24,5 +24,5 @@ class TheatreData(BaseModel):
     upcoming_performances: Optional[List[PerformanceTime]] = None
     capacity: Optional[int] = None
     currency: Optional[str] = None
-    seat_pricing: Optional[Dict] = None
+    seat_pricing: Optional[Dict[str, Any]] = None
     scrape_datetime: Optional[datetime] = None
